@@ -25,6 +25,17 @@ init(State) ->
 
 -spec do(rebar_state:t()) -> {ok, rebar_state:t()} | {error, string()}.
 do(State) ->
+    Config = rebar_state:opts(State),
+    PackConfig = rebar_state:get(Config,pack_config, []),
+    GpbOpts = rebar_state:get(Config, gpb_opts, []),
+    {Options, _} = rebar_state:command_parsed_args(State),
+    ProtoDir = proplists:get_value(protos, Options,
+                                  proplists:get_value(protos,PackConfig, "priv/protos")
+                                  ),
+    rebar_api:warn("pack config:~p ~p ~n",[PackConfig, GpbOpts]),
+    [begin
+        rebar_api:warn("pack proto name:~p",[FileName])
+     end||FileName <-filelib:wildcard(filename:join(ProtoDir, "*.proto"))],
     {ok, State}.
 
 -spec format_error(any()) ->  iolist().
