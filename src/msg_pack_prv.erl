@@ -30,9 +30,9 @@ do(State) ->
     GpbOpts = rebar_opts:get(Config, gpb_opts, []),
     {Options, _} = rebar_state:command_parsed_args(State),
     ProtoDir = proplists:get_value(protos, Options,
-                                  proplists:get_value(protos,PackConfig, "priv/protos")
+                                  proplists:get_value(protos,PackConfig, "proto")
                                   ),
-    rebar_api:warn("pack config:~p ~p ~n",[PackConfig, GpbOpts]),
+    rebar_api:warn("pack config:~p ~p ~p ~n",[ProtoDir, PackConfig, GpbOpts]),
     [begin
         rebar_api:warn("pack proto name:~p",[FileName])
      end||FileName <-filelib:wildcard(filename:join(ProtoDir, "*.proto"))],
