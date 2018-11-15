@@ -26,8 +26,8 @@ init(State) ->
 -spec do(rebar_state:t()) -> {ok, rebar_state:t()} | {error, string()}.
 do(State) ->
     Config = rebar_state:opts(State),
-    PackConfig = rebar_state:get(Config,pack_config, []),
-    GpbOpts = rebar_state:get(Config, gpb_opts, []),
+    PackConfig = rebar_opts:get(Config,pack_config, []),
+    GpbOpts = rebar_opts:get(Config, gpb_opts, []),
     {Options, _} = rebar_state:command_parsed_args(State),
     ProtoDir = proplists:get_value(protos, Options,
                                   proplists:get_value(protos,PackConfig, "priv/protos")
