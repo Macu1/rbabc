@@ -33,7 +33,7 @@ do(State) ->
                                   proplists:get_value(protos,PackConfig, "proto")
                                   ),
     RouterMod = get_router_module(PackConfig, GpbOpts),
-    rebar_api:warn("pack config:~p ~p ~p ~n",[ProtoDir, PackConfig, GpbOpts]),
+%    rebar_api:warn("pack config:~p ~p ~p ~n",[ProtoDir, PackConfig, GpbOpts]),
     AllCommands =
     lists:foldl(fun(FileName,Acc) ->
                         rebar_api:warn("pack proto name:~p",[FileName]),
