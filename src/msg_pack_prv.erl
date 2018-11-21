@@ -80,7 +80,7 @@ get_router_module(PackConfig, GpbOpts) ->
     list_to_atom(ModuleNamePrefix ++ RouterMod ++ ModuleNameSuffix).
 
 preload_pb_file(FileName,GpbOpts) ->
-    Dir = proplists:get_value(o_erl, "Options", "src"),
+    Dir = proplists:get_value(o_erl, GpbOpts, "src"),
     ModuleNameSuffix = proplists:get_value(module_name_suffix,GpbOpts, "_pb"),
     ModuleNamePrefix = proplists:get_value(module_name_prefix,GpbOpts, ""),
     CompiledFileName = filename:join(Dir, ModuleNamePrefix ++
