@@ -34,33 +34,33 @@ do(State) ->
                                   ),
     RouterMod = get_router_module(PackConfig, GpbOpts),
     rebar_api:warn("pack config:~p ~p ~p ~n",[ProtoDir, PackConfig, GpbOpts]),
-    [begin
-        rebar_api:warn("pack proto name:~p",[FileName]),
-        GpbModule = preload_pb_file(FileName, GpbOpts),
-        try
-            gen_encoder_decoder(RouterMod,GpbModule,GpbOpts,PackConfig,State)
-        catch E:R ->
-                  rebar_utils:abort("Failed to generate tag_id_map :~p with ~p ~p ~n"
-                                    ,[FileName,E,R])
-        end
-     end||FileName <-filelib:wildcard(filename:join(ProtoDir, "*.proto"))],
+    AllCommands =
+    lists:foldl(fun(FileName,Acc) ->
+                        rebar_api:warn("pack proto name:~p",[FileName]),
+                        GpbModule = preload_pb_file(FileName, GpbOpts),
+                        try
+                            gen_encoder_decoder(RouterMod,GpbModule,GpbOpts,PackConfig,State) ++ Acc
+                        catch E:R ->
+                                  rebar_utils:abort("Failed to generate tag_id_map :~p with ~p ~p ~n"
+                                                    ,[FileName,E,R])
+                        end
+                end,[],filelib:wildcard(filename:join(ProtoDir, "*.proto"))),
+    flush_commands(PackConfig,AllCommands,State),
+    rebar_log:log(info, "AllCommands:~p~n",[AllCommands]),
     {ok, State}.
 
 -spec format_error(any()) ->  iolist().
 format_error(Reason) ->
     io_lib:format("~p", [Reason]).
 
-gen_encoder_decoder(RouterMod,GpbModule,_GpbOpts,PackConfig, State) ->
+gen_encoder_decoder(RouterMod,GpbModule,_GpbOpts,PackConfig, _State) ->
     RouterEnum = proplists:get_value(router_enum,PackConfig,"mod_list"),
     AllRouters = RouterMod:find_enum_def(list_to_atom(RouterEnum)),
     case lists:keyfind(GpbModule,1,AllRouters) of
         false -> [];
         _ ->
-            %    RouterPackage = atom_to_list(RouterMod:get_package_name()),
-            %    RouterEnumFun = list_to_atom("enum_value_by_symbol_"++RouterEnum),
             ModEnum = proplists:get_value(mod_enum,PackConfig,"tag_map"),
-            %    ModEnumFun = list_to_atom("enum_value_by_symbol_"++ModEnum),
-            RouterID = RouterMod:enum_value_by_symbol(list_to_atom(RouterEnum),list_to_atom(GpbModule)),
+            RouterID = RouterMod:enum_value_by_symbol(list_to_atom(RouterEnum),GpbModule),
             Commands = [begin
                             [{router_id,RouterID}
                              ,{pb_module, atom_to_list(GpbModule)}
@@ -68,19 +68,26 @@ gen_encoder_decoder(RouterMod,GpbModule,_GpbOpts,PackConfig, State) ->
                              ,{message_name, atom_to_list(MsgName)}
                             ]
                         end||{MsgName,MsgID} <- GpbModule:find_enum_def(list_to_atom(ModEnum))],
-            Service = [{out_dir, proplists:get_value(o_erl,PackConfig,"src")}
-                       ,{router_module, proplists:get_value(router_module,PackConfig,"router")}
-                       ,{commands, Commands}],
-            rebar_log:log(debug, "service:~p",[Service]),
-            Force = proplists:get_value(force, PackConfig, true),
-            rebar_templater:new("msg_pack",Service,Force,State)
+            rebar_log:log(info, "~w commands:~p~n",[GpbModule,Commands]),
+            Commands
     end.
 
+flush_commands(PackConfig,Commands,State)->
+    Service = [{out_dir, proplists:get_value(o_erl,PackConfig,"src")}
+               ,{router_module, proplists:get_value(router_module,PackConfig,"route")}
+               ,{commands, Commands}],
+    rebar_log:log(debug, "service:~p",[Service]),
+    Force = proplists:get_value(force, PackConfig, true),
+    rebar_templater:new("msg_pack",Service,Force,State).
+
+
 get_router_module(PackConfig, GpbOpts) ->
-    RouterMod = proplists:get_value(router_module, PackConfig, "router"),
+    RouterMod = proplists:get_value(router_module, PackConfig, "route"),
     ModuleNameSuffix = proplists:get_value(module_name_suffix, GpbOpts,"_pb"),
     ModuleNamePrefix = proplists:get_value(module_name_prefix, GpbOpts, ""),
-    list_to_atom(ModuleNamePrefix ++ RouterMod ++ ModuleNameSuffix).
+    FileName =ModuleNamePrefix ++ RouterMod ++ ModuleNameSuffix,
+    preload_pb_file(FileName, GpbOpts),
+    list_to_atom(FileName).
 
 preload_pb_file(FileName,GpbOpts) ->
     Dir = proplists:get_value(o_erl, GpbOpts, "src"),
