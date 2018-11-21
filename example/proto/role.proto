@@ -1,0 +1,24 @@
+syntax = "proto3";
+import "base.proto";
+package msg;
+
+enum tag_map{
+        cs_role = 1;
+        sc_role = 2;
+    }
+
+message cs_role{
+    required string name = 1;
+    required int32 id = 2;
+    required person_enum type = 3;
+
+    enum person_enum{
+        val1 = 1001;
+        val2 = 1002;
+        }
+    }
+
+message sc_role{
+        required int32 result = 1;
+        repeated ger_dtl gers = 2;
+    }

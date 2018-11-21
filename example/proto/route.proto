@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package route;
+
+enum mod_list{
+    role = 101;
+    item = 102;
+    ger = 103;
+    }
+

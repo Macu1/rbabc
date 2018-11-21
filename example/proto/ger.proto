@@ -1,0 +1,27 @@
+syntax = "proto3";
+import "base.proto";
+package msg;
+
+enum tag_map {
+    cs_ger = 1;
+    sc_ger = 2;
+    cs_ger_update = 3;
+    sc_ger_update = 4;
+    }
+
+message cs_ger{
+    }
+
+message sc_ger{
+        repeated ger_dtl gers = 1;
+    }
+
+message cs_ger_update{
+        required int32 gerID = 1;
+    }
+
+message sc_ger_update{
+        required int32 result = 1;
+        required ger_dtl ger = 2;
+    }
+
