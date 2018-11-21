@@ -24,3 +24,19 @@ Then just call your plugin directly in an existing application:
     ===> Fetching msg_pack
     ===> Compiling msg_pack
     <Plugin Output>
+
+
+Config
+---
+
+append these to rebar.config
+'''
+{pack_config, [{router_module,"route"}
+                ,{router_enum, "mod_list"}
+                ,{o_erl, "src/proto"}
+                ,{mod_enum, "tag_map"}
+                ,{module_name_suffix, ""}
+                ,{module_name_prefix,""}
+               ]}.
+'''
+
