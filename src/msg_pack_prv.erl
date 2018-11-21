@@ -46,7 +46,7 @@ do(State) ->
                         end
                 end,[],filelib:wildcard(filename:join(ProtoDir, "*.proto"))),
     flush_commands(PackConfig,AllCommands,State),
-    rebar_log:log(info, "AllCommands:~p~n",[AllCommands]),
+%    rebar_log:log(info, "AllCommands:~p~n",[AllCommands]),
     {ok, State}.
 
 -spec format_error(any()) ->  iolist().
@@ -68,7 +68,7 @@ gen_encoder_decoder(RouterMod,GpbModule,_GpbOpts,PackConfig, _State) ->
                              ,{message_name, atom_to_list(MsgName)}
                             ]
                         end||{MsgName,MsgID} <- GpbModule:find_enum_def(list_to_atom(ModEnum))],
-            rebar_log:log(info, "~w commands:~p~n",[GpbModule,Commands]),
+%            rebar_log:log(info, "~w commands:~p~n",[GpbModule,Commands]),
             Commands
     end.
 
