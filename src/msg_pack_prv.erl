@@ -88,7 +88,7 @@ preload_pb_file(FileName,GpbOpts) ->
                                      ModuleNameSuffix ++".erl"),
     rebar_log:log(info, "loading ~s~n",[CompiledFileName]),
     GpbIncludeDir = filename:join(code:lib_dir(gpb), "include"),
-    case file:compile(CompiledFileName,[binary, {i,GpbIncludeDir}, {i,"./include"},return_errors]) of
+    case compile:file(CompiledFileName,[binary, {i,GpbIncludeDir}, {i,"./include"},return_errors]) of
         {ok,Module,Compiled} ->
             {module, _} = code:load_binary(Module, CompiledFileName, Compiled),
             Module;
