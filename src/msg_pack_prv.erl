@@ -52,26 +52,29 @@ format_error(Reason) ->
 
 gen_encoder_decoder(RouterMod,GpbModule,_GpbOpts,PackConfig, State) ->
     RouterEnum = proplists:get_value(router_enum,PackConfig,"mod_list"),
-%    RouterPackage = atom_to_list(RouterMod:get_package_name()),
-    RouterEnumFun = list_to_atom("enum_value_by_symbol_"++RouterEnum),
-    ModEnum = proplists:get_value(mod_enum,PackConfig,"tag_map"),
-%    ModEnumFun = list_to_atom("enum_value_by_symbol_"++ModEnum),
-    Commands = [begin
-                    RouterID = RouterMod:RouterEnumFun(list_to_atom(S)),
-                    [
-                     [{router_id,RouterID}
-                      ,{pb_module, atom_to_list(S)}
-                      ,{message_id, MsgID}
-                      ,{message_name, atom_to_list(MsgName)}
-                     ]
-                     ||{MsgName,MsgID} <- S:find_enum_def(list_to_atom(ModEnum))]
-                end||S <- GpbModule],
-    Service = [{out_dir, proplists:get_value(o_erl,PackConfig,"src")}
-               ,{router_module, proplists:get_value(router_module,PackConfig,"router")}
-               ,{commands, Commands}],
-    rebar_log:log(debug, "service:~p",[Service]),
-    Force = proplists:get_value(force, PackConfig, true),
-    rebar_templater:new("msg_pack",Service,Force,State).
+    AllRouters = RouterMod:find_enum_def(list_to_atom(RouterEnum)),
+    case lists:keyfind(GpbModule,1,AllRouters) of
+        false -> [];
+        _ ->
+            %    RouterPackage = atom_to_list(RouterMod:get_package_name()),
+            %    RouterEnumFun = list_to_atom("enum_value_by_symbol_"++RouterEnum),
+            ModEnum = proplists:get_value(mod_enum,PackConfig,"tag_map"),
+            %    ModEnumFun = list_to_atom("enum_value_by_symbol_"++ModEnum),
+            RouterID = RouterMod:enum_value_by_symbol(list_to_atom(RouterEnum),list_to_atom(GpbModule)),
+            Commands = [begin
+                            [{router_id,RouterID}
+                             ,{pb_module, atom_to_list(GpbModule)}
+                             ,{message_id, MsgID}
+                             ,{message_name, atom_to_list(MsgName)}
+                            ]
+                        end||{MsgName,MsgID} <- GpbModule:find_enum_def(list_to_atom(ModEnum))],
+            Service = [{out_dir, proplists:get_value(o_erl,PackConfig,"src")}
+                       ,{router_module, proplists:get_value(router_module,PackConfig,"router")}
+                       ,{commands, Commands}],
+            rebar_log:log(debug, "service:~p",[Service]),
+            Force = proplists:get_value(force, PackConfig, true),
+            rebar_templater:new("msg_pack",Service,Force,State)
+    end.
 
 get_router_module(PackConfig, GpbOpts) ->
     RouterMod = proplists:get_value(router_module, PackConfig, "router"),
