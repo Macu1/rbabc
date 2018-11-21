@@ -30,13 +30,13 @@ Config
 ---
 
 append these to rebar.config
-'''
-{pack_config, [{router_module,"route"}
+
+    {pack_config, [{router_module,"route"}
                 ,{router_enum, "mod_list"}
                 ,{o_erl, "src/proto"}
                 ,{mod_enum, "tag_map"}
                 ,{module_name_suffix, ""}
                 ,{module_name_prefix,""}
                ]}.
-'''
+
 
