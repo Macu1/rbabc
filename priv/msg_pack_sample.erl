@@ -1,4 +1,4 @@
--module({{router_module}}).
+-module({{pp}}).
 -export([decode/1,encode/2]).
 
 {{#commands}}
