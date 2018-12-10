@@ -46,7 +46,7 @@ do(State) ->
                         AllRouters = RouterMod:find_enum_def(list_to_atom(RouterEnum)),
                         rebar_api:warn("pack proto name:~p,~p",[FileName,AllRouters]),
                         case lists:keyfind(GpbModule,1,AllRouters) of
-                            false -> [];
+                            false -> Acc;
                             _ ->
                                 try
                                     gen_encoder_decoder(RouterMod,RouterEnum,GpbModule,GpbOpts,PackConfig,State) ++ Acc
