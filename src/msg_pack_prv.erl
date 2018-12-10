@@ -41,7 +41,7 @@ do(State) ->
                                                 )
                             ),
     RouterMod = get_router_module(DirBase,PackConfig, GpbOpts),
-%    rebar_api:warn("pack config:~p ~p ~p ~n",[ProtoDir, PackConfig, GpbOpts]),
+    rebar_api:abort("pack config:~p ~p ~p ~p~n",[DirBase,ProtoDir, PackConfig, GpbOpts]),
     AllCommands =
     lists:foldl(fun(FileName,Acc) ->
                         GpbModule = preload_pb_file(DirBase,FileName, GpbOpts),
@@ -133,7 +133,7 @@ create_gpb(State,BaseDir) ->
                 [AppInfo]
            end,
     lists:foreach(fun(App) ->
-                           FakeApp = rebar_app_info:out_dir(App, BaseDir),
-                          rebar_api:warn("compile:~w~n~w",[App, rebar3_gpb_compiler:compile(App, State)]),
-                    rebar3_gpb_compiler:compile(FakeApp, State)
+                          FakeApp = rebar_app_info:out_dir(App, BaseDir),
+                           rebar_api:warn("compile:~w~n~w",[App, rebar3_gpb_compiler:compile(App, State)]),
+                           rebar3_gpb_compiler:compile(FakeApp, State)
                   end, Apps).
