@@ -34,14 +34,16 @@ do(State) ->
     PackConfig = rebar_opts:get(Config,pack_config, []),
     GpbOpts = rebar_opts:get(Config, gpb_opts, []),
     {Options, _} = rebar_state:command_parsed_args(State),
-    ProtoDir = proplists:get_value(protos, Options,
-                                  proplists:get_value(protos,PackConfig, "proto")
-                                  ),
+    ProtoDir = filename:join(DirBase,
+                             proplists:get_value(protos, Options,
+                                                 proplists:get_value(protos,PackConfig, "proto")
+                                                )
+                            ),
     RouterMod = get_router_module(DirBase,PackConfig, GpbOpts),
 %    rebar_api:warn("pack config:~p ~p ~p ~n",[ProtoDir, PackConfig, GpbOpts]),
     AllCommands =
     lists:foldl(fun(FileName,Acc) ->
-                        GpbModule = preload_pb_file(App,FileName, GpbOpts),
+                        GpbModule = preload_pb_file(DirBase,FileName, GpbOpts),
                         RouterEnum = proplists:get_value(router_enum,PackConfig,"mod_list"),
                         AllRouters = RouterMod:find_enum_def(list_to_atom(RouterEnum)),
                         rebar_api:warn("pack proto name:~p,~p",[FileName,AllRouters]),
