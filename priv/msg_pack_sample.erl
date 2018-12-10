@@ -3,14 +3,14 @@
 
 {{#commands}}
 decode(<<{{router_id}}:16,{{message_id}}:16,Bin/binary>>) ->
-    { {{pb_module}}, {{message_name}},{{pb_module}}:decode(Bin,{{message_name}})};
+    { {{pb_module}}, {{message_name}},{{pb_module}}:decode_msg(Bin,{{message_name}})};
 {{/commands}}
 decode(Msg) ->
     throw({error, no_decoder,Msg}).
 
 {{#commands}}
 encode({{message_name}}, Msg) ->
-    EncodeBin = {{pb_module}}:encode(Msg),
+    EncodeBin = {{pb_module}}:encode_msg(Msg),
     Bin = << {{router_id}}:16, {{message_id}}:16, EncodeBin>>,
     Bin;
 {{/commands}}
