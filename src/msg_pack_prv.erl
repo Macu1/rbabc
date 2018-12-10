@@ -27,13 +27,17 @@ init(State) ->
 do(State) ->
     Config = rebar_state:opts(State),
     App = rebar_state:current_app(State),
+    DirBase = case App of
+                  undefined -> ".";
+                  _ -> rebar_app_info:dir(App)
+              end,
     PackConfig = rebar_opts:get(Config,pack_config, []),
     GpbOpts = rebar_opts:get(Config, gpb_opts, []),
     {Options, _} = rebar_state:command_parsed_args(State),
     ProtoDir = proplists:get_value(protos, Options,
                                   proplists:get_value(protos,PackConfig, "proto")
                                   ),
-    RouterMod = get_router_module(App,PackConfig, GpbOpts),
+    RouterMod = get_router_module(DirBase,PackConfig, GpbOpts),
 %    rebar_api:warn("pack config:~p ~p ~p ~n",[ProtoDir, PackConfig, GpbOpts]),
     AllCommands =
     lists:foldl(fun(FileName,Acc) ->
@@ -52,7 +56,7 @@ do(State) ->
                                 end
                         end
                 end,[],filelib:wildcard(filename:join(ProtoDir, "*.proto"))),
-    flush_commands(PackConfig,AllCommands,State),
+    flush_commands(DirBase,PackConfig,AllCommands,State),
 %    rebar_log:log(info, "AllCommands:~p~n",[AllCommands]),
     {ok, State}.
 
@@ -73,8 +77,9 @@ gen_encoder_decoder(RouterMod,RouterEnum,GpbModule,_GpbOpts,PackConfig, _State) 
 %            rebar_log:log(info, "~w commands:~p~n",[GpbModule,Commands]),
             Commands.
 
-flush_commands(PackConfig,Commands,State)->
-    Service = [{out_dir, proplists:get_value(o_erl,PackConfig,"src")}
+flush_commands(BaseDir,PackConfig,Commands,State)->
+    OutDir = filename:join(BaseDir,proplists:get_value(o_erl,PackConfig,"src")),
+    Service = [{out_dir, OutDir}
                ,{pp, proplists:get_value(file,PackConfig,"pp")}
                ,{commands, Commands}],
     rebar_log:log(debug, "service:~p",[Service]),
@@ -82,20 +87,16 @@ flush_commands(PackConfig,Commands,State)->
     rebar_templater:new("msg_pack",Service,Force,State).
 
 
-get_router_module(App,PackConfig, GpbOpts) ->
+get_router_module(BaseDir,PackConfig, GpbOpts) ->
     RouterMod = proplists:get_value(router_module, PackConfig, "route"),
     ModuleNameSuffix = proplists:get_value(module_name_suffix, GpbOpts,"_pb"),
     ModuleNamePrefix = proplists:get_value(module_name_prefix, GpbOpts, ""),
     FileName =ModuleNamePrefix ++ RouterMod ++ ModuleNameSuffix,
-    preload_pb_file(App,FileName, GpbOpts),
+    preload_pb_file(BaseDir,FileName, GpbOpts),
     list_to_atom(FileName).
 
-preload_pb_file(App,FileName,GpbOpts) ->
+preload_pb_file(DirBase,FileName,GpbOpts) ->
     DirAppend = proplists:get_value(o_erl, GpbOpts, "src"),
-    DirBase = case App of
-                  undefined -> ".";
-                  _ -> rebar_app_info:dir(App)
-              end,
     Dir = filename:join(DirBase,DirAppend),
     ModuleNameSuffix = proplists:get_value(module_name_suffix,GpbOpts, "_pb"),
     ModuleNamePrefix = proplists:get_value(module_name_prefix,GpbOpts, ""),
