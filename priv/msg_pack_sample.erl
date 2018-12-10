@@ -11,7 +11,7 @@ decode(Msg) ->
 {{#commands}}
 encode({{message_name}}, Msg) ->
     EncodeBin = {{pb_module}}:encode_msg(Msg),
-    Bin = << {{router_id}}:16, {{message_id}}:16, 58:8,108:8,EncodeBin>>,
+    Bin = << {{router_id}}:16, {{message_id}}:16, 58:8,108:8,EncodeBin/bianry>>,
     Bin;
 {{/commands}}
 encode(_,Msg) ->
