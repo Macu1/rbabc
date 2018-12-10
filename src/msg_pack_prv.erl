@@ -12,6 +12,7 @@
 init(State) ->
     Provider = providers:create([
             {name, ?PROVIDER},            % The 'user friendly' name of the task
+            {namespace, msg_pack},
             {module, ?MODULE},            % The module implementation of the task
             {bare, true},                 % The task can be run by the user, always true
             {deps, ?DEPS},                % The list of dependencies
