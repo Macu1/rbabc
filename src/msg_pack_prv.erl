@@ -74,7 +74,7 @@ gen_encoder_decoder(RouterMod,GpbModule,_GpbOpts,PackConfig, _State) ->
 
 flush_commands(PackConfig,Commands,State)->
     Service = [{out_dir, proplists:get_value(o_erl,PackConfig,"src")}
-               ,{router_module, proplists:get_value(router_module,PackConfig,"route")}
+               ,{pp, proplists:get_value(file,PackConfig,"pp")}
                ,{commands, Commands}],
     rebar_log:log(debug, "service:~p",[Service]),
     Force = proplists:get_value(force, PackConfig, true),

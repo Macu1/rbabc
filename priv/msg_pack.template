@@ -3,4 +3,4 @@
     [{router_module,"","Name of protobuf module to get type specs from"}
     ,{commands,[],"List of methods for service"}
     ]}.
-{template, "msg_pack_sample.erl","{{out_dir}}/{{router_module}}.erl"}.
+{template, "msg_pack_sample.erl","{{out_dir}}/{{pp}}.erl"}.
